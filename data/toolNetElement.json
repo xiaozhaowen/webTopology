@@ -1,0 +1,67 @@
+﻿{
+  "elements": [
+    {
+      "id": "db",     
+      "title": "数据库",
+      "x": 0,
+      "y": 0,
+      "ox": 0,
+      "oy": 0,
+      "deviceType": 1
+    },
+    {
+      "id": "server",     
+      "title": "后台服务",
+      "x": 0,
+      "y": 0,
+      "ox": 0,
+      "oy": 0,
+      "deviceType": 2
+    },
+    {
+      "id": "change",     
+      "title": "交换机",
+      "x": 0,
+      "y": 0,
+      "ox": 0,
+      "oy": 0,
+      "deviceType": 3
+    },
+    {
+      "id": "internet",  
+      "title": "互联网",
+      "x": 0,
+      "y": 0,
+      "ox": 0,
+      "oy": 0,
+      "deviceType": 4
+    },
+    {
+      "id": "firewall",  
+      "title": "防火墙",
+      "x": 0,
+      "y": 0,
+      "ox": 0,
+      "oy": 0,
+      "deviceType": 5
+    },
+    {
+      "id": "terminal1",  
+      "title": "客户端1",
+      "x": 0,
+      "y": 0,
+      "ox": 0,
+      "oy": 0,
+      "deviceType": 6
+    },
+    {
+      "id": "terminal2",  
+      "title": "客户端2",
+      "x": 0,
+      "y": 0,
+      "ox": 0,
+      "oy": 0,
+      "deviceType": 7
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>拓扑监控</title>
+    <link rel="stylesheet" href="topology.css"/>
+    <link rel="stylesheet" href="../css/bootstrap.css"/>
+    <script src="../js/d3.js"></script>
+    <script src="../js/linq.min.js"></script>
+</head>
+<body>
+
+<div class="toolbarContainer">
+    <div class="toplogyToolbar">
+        <div class="btn-group">
+            <div class="btn btn-default btn-sm active" title="默认模式">
+                <div class="q-icon toolbar-default"></div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <div id="btnZoomIn" class="btn btn-default btn-sm" title="放大">
+                <div class="q-icon toolbar-zoomin"></div>
+            </div>
+            <div id="btnZoomOut"  class="btn btn-default btn-sm " title="缩小">
+                <div class="q-icon toolbar-zoomout"></div>
+            </div>
+            <div id="btnReset" class="btn btn-default btn-sm" title="复位">
+                <div class="q-icon toolbar-zoomreset"></div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <div class="btn btn-default btn-sm " title="创建连线">
+                <div class="q-icon toolbar-edge"></div>
+            </div>
+        </div>
+        <div class="btn-group">
+            <div class="btn btn-default btn-sm " title="保存">
+                <div class="q-icon toolbar-save"></div>
+            </div>
+            <div class="btn btn-default btn-sm " title="导出图片">
+                <div class="q-icon toolbar-print"></div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <div id="btnUpLevel" class="btn btn-default btn-sm " title="返回上一层">
+                <div class="q-icon toolbar-upload"></div>
+            </div>
+            <div  id="btnDownLevel" class="btn btn-default btn-sm " title="进入下一层">
+                <div class="q-icon toolbar-download"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<svg id="mainSVG"></svg>
+</body>
+<script src="topology.js"></script>
+</html>
