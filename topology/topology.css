@@ -25,9 +25,23 @@ svg {
     background-color: #ffffff;
     border: solid #E7E7E7 1px;
 }
+/*连接线*/
 .link{
     stroke: gray;
+    stroke-width: 2px;
 }
+/*临时绘制的选定*/
+.tempLink{
+    stroke: red;
+    stroke-dasharray: 10 5;
+}
+/*连接线被选中状态*/
+.linkSelected{
+    stroke: red;
+    stroke-width: 3px;
+    stroke-dasharray: 10 5;
+}
+
 
 .netElementForDrag{
 

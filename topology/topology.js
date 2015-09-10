@@ -7,29 +7,44 @@
 
 //---------------------------------------变量声明开始---------------------------------------------------
 
+//活动模式枚举，包括默认选择，绘制连接线
+if(typeof ActiveMode =="undefined"){
+    ActiveMode={
+        DefaultMode:1,
+        LineMode:2
+    }
+}
 
 //屏幕的宽度和高度以及边距
+
+
+var _isDrawing=false;//是否正在划线中
+var _startNodeForLine=null;//绘制线段的起始节点
+var _currentActiveMode=ActiveMode.DefaultMode;//当前选择模式
+
+var _tempLine=null;//临时绘制的线段
 var winWidth = window.screen.width - 50
 var winHeight = window.screen.height - 150
 var margin = { top: -5, right: -5, bottom: -5, left: -5 },
     width = winWidth - margin.left - margin.right,
     height = winHeight - margin.top - margin.bottom;
 
-
+var _currentElement=null;//当前选中的元素
 var zoomRange = [0.2, 10];//地图缩放级别范围
 var layerChangeRange={
     min:1,
     max:10
 };
-//选中元素的效果
-var outLineForChoose=null;
-//当前页面的状态：1）Monitor 是监控 2）Editor  编辑
-var pageMode="Editor";
+
+var outLineForChoose=null;//选中元素的效果
+
+var pageMode="Editor";//当前页面的状态：1）Monitor 是监控 2）Editor  编辑
 
 var translate = null;//画布的当前位移距离
 
 var scale = null;//画布的当前缩放比例
 
+var rootSVG=null; //根svg容器
 var imgPath = "../images/";//图片文件夹路径
 var imgSize = 36;//拓扑节点的边长
 //用于拖拽生成的网元缩略图尺寸
@@ -45,18 +60,18 @@ var topologySettings={
 };
 var _parentId="0";
 var _currentLayerLevel=0;
-//子网容器
-var subNetContainer=null;
-//设备节点容器
-var nodesContainer=null;
-//链路连接线容器
-var linksContainer=null;
-//界面上的所有节点
-var nodesAll=null;
+
+var subNetContainer=null;//子网容器
+
+var nodesContainer=null;//设备节点容器
+
+var linksContainer=null;//链路连接线容器
+
+var nodesAll=null;//界面上的所有节点
 
 var zoomReset;
-//监控定时器
-var myTimerID;
+
+var myTimerID;//监控定时器
 
 
 //---------------------------------------流程方法开始---------------------------------------------------
@@ -95,6 +110,18 @@ function initToolbar(){
     d3.select("#btnStopWatching").on("click", function () {
         clearInterval(myTimerID);
     });
+
+    d3.select("#btnDefaultPoint").on("click", function () {
+        _currentActiveMode=ActiveMode.DefaultMode;
+        d3.select("#btnDrawLine").classed("active",false);
+        d3.select("#btnDefaultPoint").classed("active",true);
+        resetDrawLine();
+    });
+    d3.select("#btnDrawLine").on("click", function () {
+        _currentActiveMode=ActiveMode.LineMode;
+        d3.select("#btnDrawLine").classed("active",true);
+        d3.select("#btnDefaultPoint").classed("active",false);
+    });
 }
 
 function randomImgage(){
@@ -112,7 +139,7 @@ function randomImgage(){
 function init(settings){
     //topologySettings=settings;
 
-   var rootSVG = initSVG();
+    rootSVG = initSVG();
     if(pageMode =="Editor")
         initElementBar(rootSVG);
     initToolbar();
@@ -247,7 +274,15 @@ function initElementBar(svgContainer){
 
 }
 
-
+function showLineWithMouse(pt){
+    //如果是绘制中，则线段跟随鼠标
+    if (_isDrawing) {
+        //var x = Math.max(radius, Math.min(width - radius, pt[0]));
+        //var y = Math.max(radius, Math.min(height - radius, pt[1]));
+        var newPoint=computePositionAfterTransform(pt);
+        _tempLine.attr("x2", newPoint.x).attr("y2", newPoint.y);
+    }
+}
 
 //设定svg的宽度，高度以及覆盖层（防止内部的元素跑出svg）
 //绘制必要的元素
@@ -282,6 +317,12 @@ function initSVG(){
         .on("dblclick", function () {
             changeLayerLevel(true,null);
         })
+        .on("mousemove", function () {
+            if(_currentActiveMode==ActiveMode.LineMode){
+                var pt = d3.mouse(this);
+                showLineWithMouse(pt);
+            }
+        });
 
     //在主画布中添加主元素容器，所有的内容节点都在这个容器中！！！！！
     var mainElementsContainer = mainCanvas.append("g");
@@ -443,53 +484,31 @@ function drawLinks(currentLevelData){
         .attr("x1",function(d){return getNodeCenter(d.source).x;})
         .attr("y1",function(d){return getNodeCenter(d.source).y;})
         .attr("x2",function(d){return getNodeCenter(d.target).x;})
-        .attr("y2",function(d){return getNodeCenter(d.target).y;});
-
-}
-
-//改变图层绘制
-
-
-function zooming(newScale){
-    var levelData=getNodeDataFromZooming(newScale);
-    drawNodesElements(levelData);
-}
-
-//绘制子网
-function drawSubnets(mainElementsContainer){
-    //所有子网的容器
-    subNetContainer=mainElementsContainer.append("g");
-    var subNetsAll =  subNetContainer.selectAll(".subNet")
-        .data(rootData.nodes)
-        .enter()
-        .append("g")
-        .attr("class","subNet")
-        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-        .call(d3.behavior.drag()
-            .origin(function(d) { return d; })
-            .on("dragstart", function (d) {
-                this.parentNode.appendChild(this);
-                d3.event.sourceEvent.stopPropagation();
-            })
-            .on("drag", function (d) {
-                d3.select(this).attr("transform", "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")");
-            }));
-
-    //添加设备图片
-    subNetsAll.append("image")
-        .attr("width", imgSize)
-        .attr("height", imgSize)
-        .attr("class", "nodeImg")
-        .attr("xlink:href", getSubnetImage);
-    //.on('mouseover', tip.show)
-    //.on('mouseout', tip.hide)
-
-    //添加设备文字
-    subNetsAll.append("text")
-        .attr("class","nodeText")
-        .text(function(d){return d.name;})
-        .attr("dy", imgSize +13);
-
+        .attr("y2",function(d){return getNodeCenter(d.target).y;})
+        .on("mouseover", function (d) {
+            //if(_currentElement==null || _currentElement.element !=d)
+                //d3.select(this).classed("linkSelected", true);
+                d3.select(this).style("opacity",0.3);
+        })
+        .on("mouseout", function (d) {
+            //if(_currentElement==null || _currentElement.element !=d)
+            //    d3.select(this).classed("linkSelected", false);
+            d3.select(this).style("opacity", 1);
+        })
+        .on("click", function (d) {
+            if(outLineForChoose!=null)
+                outLineForChoose.remove();
+            if(_currentElement!=null && _currentElement.elementType=="edge"){
+                var html= _currentElement.html[0];
+                d3.select(html[0]).classed("linkSelected", false);
+            }
+            _currentElement={
+                "element": d,
+                "elementType": "edge",
+                "html":d3.select(this)
+            };
+            d3.select(this).classed("linkSelected", true);
+        })
 }
 
 //根据传递过来的数据绘制子网的网元设备节点
@@ -503,7 +522,8 @@ function drawNodesElements(nodesData){
         .attr("class","node")
         .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
        .on("click", function (d) {
-           //if (d3.event.defaultPrevented) return; // click suppressed
+           // click suppressed
+           if (d3.event.defaultPrevented) return;
           if(outLineForChoose!=null)
               outLineForChoose.remove();
            outLineForChoose= d3.select(this).append("rect")
@@ -512,16 +532,69 @@ function drawNodesElements(nodesData){
                .attr("height", imgSize+2+8+12+20)
                .attr("x",-1.5)
                .attr("y",-10)
-       })
-        .call(d3.behavior.drag()
-            .origin(function(d) { return d; })
-            .on("dragstart", function (d) {
-              this.parentNode.appendChild(this);
-              d3.event.sourceEvent.stopPropagation();
 
-          })
+           //更新当前选中元素，取消连接线的选择
+           if(_currentElement!=null && _currentElement.elementType=="edge"){
+               var html= _currentElement.html[0];
+               d3.select(html[0]).classed("linkSelected", false);
+           }
+           _currentElement={
+               "element": d,
+               "elementType": "node",
+               "html":d3.select(this)
+           };
+
+           //绘制连接线开始
+           if(_currentActiveMode==ActiveMode.LineMode){
+                if(!_isDrawing){
+                    _isDrawing=true;
+                    //添加一根线段
+                    _startNodeForLine=d;
+                    _tempLine = linksContainer.append("line")
+                        .attr("x1", d.x+imgSize/2)
+                        .attr("y1",d.y+imgSize/2)
+                        .attr("x2", d.x+imgSize/2)
+                        .attr("y2", d.y+imgSize/2)
+                        .attr("class", "tempLink")
+                }else{
+                    _isDrawing=false;
+                    //_tempLine.attr("x2",  d.x+imgSize/2).attr("y2",  d.y+imgSize/2).attr("class","link");
+                    _tempLine.remove();
+                    var newLinkObject= {
+                        "id":guid(),
+                        "source": _startNodeForLine,
+                        "target": d,
+                        "arrow": 1,
+                        "text": "Edge",
+                        "state": 1,
+                        "groupId":"00"
+                    };
+                    var currentData= getCurrentLevelData();
+                    currentData.links.push(newLinkObject);
+                    drawLinks(currentData);
+                    //linksContainer
+                    //    .data([newLinkObject])
+                    //    .enter()
+                    //    .append("line")
+                    //    .attr("class","link")
+                    //    .attr("x1",function(d){return getNodeCenter(d.source).x;})
+                    //    .attr("y1",function(d){return getNodeCenter(d.source).y;})
+                    //    .attr("x2",function(d){return getNodeCenter(d.target).x;})
+                    //    .attr("y2",function(d){return getNodeCenter(d.target).y;});
+                }
+           }
+       })
+       .call(d3.behavior.drag()
+           .origin(function(d) { return d; })
+           .on("dragstart", function (d) {
+               if(_currentActiveMode ==ActiveMode.LineMode)
+                   return;
+               d3.event.sourceEvent.stopPropagation();
+           })
            .on("drag", function (d) {
-              d3.select(this).attr("transform", "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")");
+               if(_currentActiveMode ==ActiveMode.LineMode)
+                   return;
+               d3.select(this).attr("transform", "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")");
                //更改和这个节点相关的连接线的起始位置
                linksContainer.selectAll(".link")
                    .filter(function (l) {
@@ -536,7 +609,7 @@ function drawNodesElements(nodesData){
                    })
                    .attr("x2", d.x+ imgSize/2)
                    .attr("y2", d.y+ imgSize/2);
-          })
+           })
            .on("dragend", function (d) {
 
            }));
@@ -616,47 +689,6 @@ function getNetElementImage(d) {
             return imgPath+"terminal3.png";
     }
     return "";
-}
-
-//通过缩放来得到对应的层级数据
-function getNodeDataFromZooming(newScale){
-    var result={
-        "nodes":null,
-        "links":null
-    };
-    if(scale==null){//初始状态
-        var lev1s=Enumerable.From(rootData.nodes)
-            .Where("$.parentId =='0'")
-            .ToArray();
-        result.nodes=lev1s;
-    }
-    else{
-
-    }
-    return result;
-}
-
-function getParentsDataFromSons(){
-    var result={
-        "nodes":null,
-        "links":null
-    };
-}
-
-function getSonDataFromParents(parentsArray){
-    var result={
-        "nodes":[],
-        "links":null
-    };
-    for(var i=0;i<parentsArray.length;i++){
-        var parentId=parentsArray[i];
-        var sons=Enumerable.From(rootData.nodes)
-            .Where("$.parentId =='"+parentId+"'")
-            .ToArray();
-        if(sons.length>0)
-            result.nodes= result.nodes.concat(sons);
-    }
-    return result;
 }
 
 
@@ -797,3 +829,37 @@ function getCurrentLevelData(){
     }
     return currentLevelData;
 }
+
+//重置绘制连接线为初始状态
+function resetDrawLine(){
+    _currentActiveMode=ActiveMode.DefaultMode;
+    if(_tempLine!=null && _isDrawing)
+        _tempLine.remove();
+    _isDrawing=false;
+}
+
+//计算偏移和缩放之后的位置点信息
+function computePositionAfterTransform(point){
+    var newX= point[0];
+    var newY= point[1];
+    if(scale==null && translate ==null){
+        return {
+            x:newX,
+            y:newY
+        };
+    }
+    if(scale!=null ){
+        newX-=translate[0];
+        newY-=translate[1];
+    }
+    if(translate !=null){
+        newX=newX/scale;
+        newY=newY/scale;
+    }
+    return {
+        x:newX,
+        y:newY
+    };
+}
+
+
