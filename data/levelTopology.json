@@ -20,8 +20,16 @@
       {
         "id": "3",
         "name": "公共事业网",
-        "x": 302.3333282470703,
-        "y": 302,
+        "x": 802.3333282470703,
+        "y": 102,
+        "deviceType": 0,
+        "parentId": "0"
+      },
+      {
+        "id": "4",
+        "name": "局域网",
+        "x": 402.3333282470703,
+        "y": 502,
         "deviceType": 0,
         "parentId": "0"
       }
@@ -33,7 +41,8 @@
         "target": "2",
         "arrow": 1,
         "text": "后台数据流",
-        "state": 1
+        "state": 1,
+        "groupId":"0"
       },
       {
         "id": "ddbd9241-70a4-0362-cb2c-fe655ab9901a",
@@ -41,7 +50,8 @@
         "target": "3",
         "arrow": 1,
         "text": "ABCD",
-        "state": 1
+        "state": 1,
+        "groupId":"0"
       }
     ]
   },
@@ -49,9 +59,25 @@
     "nodes": [
       {
         "id": "11",
-        "name": "LTE内网子网",
-        "x": 402.3333282470703,
-        "y": 102,
+        "name": "LTE内网子网_A",
+        "x": 102.3333282470703,
+        "y": 302,
+        "deviceType": -1,
+        "parentId": "1"
+      },
+      {
+        "id": "12",
+        "name": "LTE内网子网_B",
+        "x": 202.3333282470703,
+        "y": 80,
+        "deviceType": -1,
+        "parentId": "1"
+      },
+      {
+        "id": "13",
+        "name": "LTE内网子网_C",
+        "x": 526,
+        "y": 150,
         "deviceType": -1,
         "parentId": "1"
       },
@@ -66,14 +92,31 @@
       {
         "id": "31",
         "name": "公共事业网子网",
-        "x": 302.3333282470703,
-        "y": 302,
+        "x": 867,
+        "y": 63,
         "deviceType": -1,
         "parentId": "3"
       }
     ],
     "links": [
-
+      {
+        "id": "1",
+        "source": "21",
+        "target": "11",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"00"
+      },
+      {
+        "id": "2",
+        "source": "21",
+        "target": "31",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"00"
+      }
     ]
   },
   "2":{
@@ -81,30 +124,251 @@
       {
         "id": "111",
         "name": "数据库",
-        "x": 402.3333282470703,
-        "y": 102,
+        "x": 102,
+        "y": 98,
         "deviceType": 1,
+        "parentId": "11"
+      },
+      {
+        "id": "112",
+        "name": "服务器",
+        "x": 202,
+        "y": 302,
+        "deviceType": 2,
+        "parentId": "11"
+      },
+      {
+        "id": "113",
+        "name": "终端",
+        "x": 125,
+        "y": 30,
+        "deviceType": 6,
+        "parentId": "11"
+      },
+      {
+        "id": "114",
+        "name": "交换机",
+        "x": 357,
+        "y": 102,
+        "deviceType": 3,
+        "parentId": "11"
+      },
+      {
+        "id": "115",
+        "name": "云服务",
+        "x": 125,
+        "y": 250,
+        "deviceType": 4,
         "parentId": "11"
       },
       {
         "id": "211",
         "name": "客户端",
-        "x": 702.3333282470703,
+        "x": 702,
         "y": 302,
         "deviceType": 6,
         "parentId": "21"
       },
       {
+        "id": "212",
+        "name": "客户端",
+        "x": 772,
+        "y": 302,
+        "deviceType": 6,
+        "parentId": "21"
+      },
+      {
+        "id": "213",
+        "name": "客户端",
+        "x": 842,
+        "y": 302,
+        "deviceType": 6,
+        "parentId": "21"
+      },
+      {
+        "id": "214",
+        "name": "客户端",
+        "x": 912,
+        "y": 302,
+        "deviceType": 6,
+        "parentId": "21"
+      },
+      {
+        "id": "215",
+        "name": "客户端",
+        "x": 702,
+        "y": 402,
+        "deviceType": 6,
+        "parentId": "21"
+      },
+      {
+        "id": "216",
+        "name": "客户端",
+        "x": 772,
+        "y": 402,
+        "deviceType": 6,
+        "parentId": "21"
+      },
+      {
+        "id": "217",
+        "name": "客户端",
+        "x": 842,
+        "y": 402,
+        "deviceType": 6,
+        "parentId": "21"
+      },
+      {
+        "id": "218",
+        "name": "客户端",
+        "x": 912,
+        "y": 402,
+        "deviceType": 6,
+        "parentId": "21"
+      },
+      {
+        "id": "219",
+        "name": "交换机",
+        "x": 812,
+        "y": 202,
+        "deviceType": 3,
+        "parentId": "21"
+      },
+      {
         "id": "311",
         "name": "服务器",
-        "x": 302.3333282470703,
-        "y": 302,
+        "x": 893,
+        "y": 47,
         "deviceType": 2,
         "parentId": "31"
       }
     ],
     "links": [
-
+      {
+        "id": "1",
+        "source": "111",
+        "target": "114",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"11"
+      },
+      {
+        "id": "2",
+        "source": "112",
+        "target": "114",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"11"
+      },
+      {
+        "id": "3",
+        "source": "113",
+        "target": "114",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"11"
+      },
+      {
+        "id": "4",
+        "source": "115",
+        "target": "114",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"11"
+      },
+      {
+        "id": "21",
+        "source": "219",
+        "target": "211",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"21"
+      },
+      {
+        "id": "22",
+        "source": "219",
+        "target": "212",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"21"
+      },
+      {
+        "id": "23",
+        "source": "219",
+        "target": "213",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"21"
+      },
+      {
+        "id": "24",
+        "source": "219",
+        "target": "214",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"21"
+      },
+      {
+        "id": "25",
+        "source": "219",
+        "target": "215",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"21"
+      },
+      {
+        "id": "26",
+        "source": "219",
+        "target": "216",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"21"
+      },
+      {
+        "id": "27",
+        "source": "219",
+        "target": "217",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"21"
+      },
+      {
+        "id": "28",
+        "source": "219",
+        "target": "218",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"21"
+      },
+      {
+        "id": "00",
+        "source": "219",
+        "target": "114",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"00"
+      },
+      {
+        "id": "01",
+        "source": "311",
+        "target": "219",
+        "arrow": 1,
+        "text": "后台数据流",
+        "state": 1,
+        "groupId":"00"
+      }
     ]
   }
 }

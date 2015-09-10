@@ -5,6 +5,13 @@ svg {
     width: 99.5%;
    border: solid 1px #E7E7E7;
 }
+.outLine{
+    stroke: #009900;
+    stroke-width: 2;
+    /*stroke-dasharray: 10 5;*/
+    fill: none;
+    /*opacity: .6;*/
+}
 
 .toolbarContainer{
     /*position: absolute;*/

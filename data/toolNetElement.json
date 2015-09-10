@@ -55,13 +55,22 @@
       "deviceType": 6
     },
     {
-      "id": "terminal2",  
-      "title": "客户端2",
+      "id": "net1",
+      "title": "子网",
       "x": 0,
       "y": 0,
       "ox": 0,
       "oy": 0,
-      "deviceType": 7
+      "deviceType":0
+    },
+    {
+      "id": "net2",
+      "title": "子网2",
+      "x": 0,
+      "y": 0,
+      "ox": 0,
+      "oy": 0,
+      "deviceType":-1
     }
   ]
 }

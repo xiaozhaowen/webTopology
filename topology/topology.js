@@ -21,7 +21,8 @@ var layerChangeRange={
     min:1,
     max:10
 };
-
+//选中元素的效果
+var outLineForChoose=null;
 //当前页面的状态：1）Monitor 是监控 2）Editor  编辑
 var pageMode="Editor";
 
@@ -54,6 +55,8 @@ var linksContainer=null;
 var nodesAll=null;
 
 var zoomReset;
+//监控定时器
+var myTimerID;
 
 
 //---------------------------------------流程方法开始---------------------------------------------------
@@ -75,6 +78,34 @@ function initToolbar(){
     d3.select("#btnUpLevel").on("click", function () {
         changeLayerLevel(false,null);
     });
+    
+    d3.select("#btnMonitor").on("click", function () {
+        if(_parentId!="0")
+            return;
+        myTimerID=setInterval(function(){
+            nodesAll[0].forEach(function (d) {
+                var img= d.children[0];
+                d3.select(img).attr("xlink:href", function () {
+                    return randomImgage();
+                })
+            });
+        },2000);
+    });
+    
+    d3.select("#btnStopWatching").on("click", function () {
+        clearInterval(myTimerID);
+    });
+}
+
+function randomImgage(){
+    var imgArray=[
+        "computerGroup.png",
+        "computerGroup_alram.png",
+        "computerGroup_error.png",
+        "computerGroup_run.png"
+    ];
+    var index = Math.floor(Math.random() * 4);
+    return imgPath +  imgArray[index];
 }
 
 //初始化
@@ -178,6 +209,7 @@ function initElementBar(svgContainer){
                         d3.select(this).attr("x", d.ox).attr("y", d.oy);
                         d.x= d.ox;
                         d.y= d.oy;
+                        tempBackGround.remove();
                         return;
                     }
 
@@ -257,6 +289,8 @@ function initSVG(){
    zoomReset= function () {
        zoom.scale(1);
        zoom.translate([0,0]);
+       scale=null;
+       translate=null;
        mainElementsContainer
            .transition()
            .duration(1000)
@@ -380,7 +414,10 @@ function drawLayerNodesWithParnet(parentNode){
     var subNodesArray=Enumerable.From(currentLevelData.nodes)
         .Where("$.parentId =='"+parentNode.id+"'")
         .ToArray();
-    drawLinks(subNodesArray);
+    var subLinksArray=Enumerable.From(currentLevelData.links)
+        .Where("$.groupId =='"+parentNode.id+"'")
+        .ToArray();
+    drawLinks({"links":subLinksArray,"nodes":subNodesArray});
     drawNodesElements({"nodes":subNodesArray});
 }
 
@@ -465,6 +502,17 @@ function drawNodesElements(nodesData){
         .append("g")
         .attr("class","node")
         .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+       .on("click", function (d) {
+           //if (d3.event.defaultPrevented) return; // click suppressed
+          if(outLineForChoose!=null)
+              outLineForChoose.remove();
+           outLineForChoose= d3.select(this).append("rect")
+               .attr("class","outLine")
+               .attr("width", imgSize+10)
+               .attr("height", imgSize+2+8+12+20)
+               .attr("x",-1.5)
+               .attr("y",-10)
+       })
         .call(d3.behavior.drag()
             .origin(function(d) { return d; })
             .on("dragstart", function (d) {
@@ -472,7 +520,7 @@ function drawNodesElements(nodesData){
               d3.event.sourceEvent.stopPropagation();
 
           })
-            .on("drag", function (d) {
+           .on("drag", function (d) {
               d3.select(this).attr("transform", "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")");
                //更改和这个节点相关的连接线的起始位置
                linksContainer.selectAll(".link")
@@ -500,7 +548,6 @@ function drawNodesElements(nodesData){
         .attr("class", "nodeImg")
         .attr("xlink:href", getDeviceImage)
         .on('dblclick', function (d) {
-
             //双击节点，进入他的下一个级别的拓扑
           /*  _currentLayerLevel+=1;
             var currentLevelData=rootData[_currentLayerLevel.toString()];
@@ -509,11 +556,17 @@ function drawNodesElements(nodesData){
                 _currentLayerLevel-=1;
                 return;
             }
-
             drawLayerNodesWithParnet(d);*/
+            console.log(d);
             changeLayerLevel(true,d);
         })
-        //.on('mouseout', tip.hide)
+        //.on('mouseover', function (d) {
+        //    console.log("move")
+        //})
+        //.on('mouseout', function (d) {
+        //    console.log("out")
+        //})
+
 
     //添加设备文字
     nodesAll.append("text")
@@ -545,6 +598,7 @@ function getTopologyData(callBack){
 
 
 function getNetElementImage(d) {
+    return getDeviceImage(d);
     switch (d.deviceType){
         case 1:
             return imgPath+"computerGroup.png";
@@ -629,7 +683,7 @@ function insertArrowDef(svg) {
 function getDeviceImage(d) {
 
     if (d.deviceType == 1)
-        return imgPath + "dataBaseServer.png";
+        return imgPath + "homeserver.png";
     else if (d.deviceType == 2)
         return imgPath + "serverBase.png";
     else if (d.deviceType == 3)
@@ -731,6 +785,8 @@ function changeLayerLevel(isDown,parentNode){
         drawLayerNodesWithParnet(parentNode);
     else
         drawLayerNodes();
+
+    zoomReset();
 }
 
 //获取当前的层级数据
